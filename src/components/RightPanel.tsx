@@ -1,8 +1,19 @@
 "use client"
 
-export function RightPanel() {
-  {
-    /* TODO:ここに身だしなみについてのコメントを表示していく */
-  }
-  return <>Hello, world!</>
+import { AdvisorBubble, AdvisorBubbleProps } from "./AdvisorBubble"
+
+export interface RightPanelProps {
+  advisorBubblePropsList: AdvisorBubbleProps[]
+}
+
+export function RightPanel(props: RightPanelProps) {
+  const { advisorBubblePropsList } = props
+
+  return (
+    <>
+      {advisorBubblePropsList.map((props, index) => (
+        <AdvisorBubble key={index} {...props} />
+      ))}
+    </>
+  )
 }
