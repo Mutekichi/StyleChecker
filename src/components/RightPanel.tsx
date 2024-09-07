@@ -1,8 +1,11 @@
 "use client"
 
+import { ClaudeUI } from "./ClaudeUI"
+
 export function RightPanel() {
-  {
-    /* TODO:ここに身だしなみについてのコメントを表示していく */
-  }
-  return <>Hello, world!</>
+  return (
+    <div>
+      <ClaudeUI />
+    </div>
+  )
 }
