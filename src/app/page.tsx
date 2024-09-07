@@ -6,7 +6,7 @@ import { Box, HStack } from "@chakra-ui/react"
 
 const rightPanelProps: RightPanelProps = {
   advisorBubblePropsList: [
-    { emotion: "happy", text: "Hello!" },
+    { emotion: "happy", text: "Hello!", isSpeaking: true },
     { emotion: "angry", text: "Go away!" },
     {
       emotion: "neutral",
