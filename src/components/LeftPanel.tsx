@@ -3,6 +3,7 @@
 import { Situation, situationToPrompt } from "@/features/Situation"
 import { UseClaudeReturn } from "@/hooks/useClaude"
 import {
+  Box,
   Button,
   HStack,
   Input,
@@ -10,11 +11,11 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react"
-import { useCallback } from "react"
+import { Image } from "@chakra-ui/react"
 
 type LeftPanelInput = Pick<
   UseClaudeReturn,
-  "streamResponse" | "image" | "handleImageChange"
+  "streamResponse" | "image" | "handleImageChange" | "setImage"
 > & {
   situation: Situation | undefined
 }
@@ -23,17 +24,21 @@ export function LeftPanel({
   situation,
   streamResponse,
   image,
+  setImage,
   handleImageChange,
 }: LeftPanelInput) {
   return (
-    <VStack spacing={4} justifyContent="flex-start">
+    <VStack spacing={4} justifyContent="flex-start" w="100%">
       {/* TODO: ドロップゾーンを追加する */}
-      <Input
-        type="file"
-        accept="image/*"
-        onChange={handleImageChange}
-        border={0}
-      />
+      <Box>
+        <Image
+          src={image ? URL.createObjectURL(image) : "/images/happy.png"}
+          alt="portrait"
+          width="100%"
+          height="auto"
+          borderRadius="16px"
+        />
+      </Box>
     </VStack>
   )
 }
