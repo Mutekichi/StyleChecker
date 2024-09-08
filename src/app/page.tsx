@@ -1,7 +1,6 @@
 "use client"
 
 import { AppearanceCheckResultView } from "@/components/AppearanceCheck"
-import { LeftPanel } from "@/components/LeftPanel"
 import { parseAppearanceCheck } from "@/features/Parse"
 import { AppearanceCheckProps } from "@/features/Parse/types"
 import { Situation, situationToPrompt } from "@/features/Situation"
@@ -19,20 +18,24 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react"
-import { useCallback, useMemo, useState } from "react"
+import { Fragment, useCallback, useMemo, useRef, useState } from "react"
 import { FaCameraRetro } from "react-icons/fa"
+import { Camera, CameraType } from "react-camera-pro"
+import { downloadImageAsFile } from "@/utils/download"
 
 export default function Home() {
-  const {
-    streamResponse,
-    image,
-    setImage,
-    handleImageChange,
-    isLoading,
-    output,
-  } = useClaude()
+  const { streamResponse, isLoading, output } = useClaude()
   const toast = useToast()
+  const camera = useRef<CameraType>(null)
   const [situation, setSituation] = useState<Situation | undefined>(undefined)
+
+  const [takenPicture, setTakenPicture] = useState<File | undefined>(undefined)
+  const pictureUrl = useMemo(() => {
+    if (takenPicture === undefined) {
+      return undefined
+    }
+    return URL.createObjectURL(takenPicture)
+  }, [takenPicture])
 
   const onChangeSituation = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = event.target
@@ -54,47 +57,43 @@ export default function Home() {
       return
     }
 
-    const selectFile = (): Promise<File | null> => {
-      return new Promise((resolve) => {
-        const input = document.createElement("input")
-        input.type = "file"
-        input.accept = "image/*"
-        input.onchange = (e) => {
-          const file = (e.target as HTMLInputElement).files?.[0] || null
-          resolve(file)
+    if (camera.current) {
+      const image = camera.current.takePhoto()
+      const imageUrl = image as string
+      const imageFile = await downloadImageAsFile(imageUrl)
+      setTakenPicture(imageFile)
+
+      console.log(
+        imageFile === undefined ? "undefined image" : "defined Image!"
+      )
+      try {
+        // const selectedFile = await selectFile()
+
+        if (!imageFile) {
+          toast({
+            description: "ファイルが選択されませんでした。",
+            status: "warning",
+            isClosable: true,
+            position: "top",
+          })
+          return
         }
-        input.click()
-      })
-    }
 
-    try {
-      const selectedFile = await selectFile()
+        const imageUrl = URL.createObjectURL(imageFile)
+        const prompt = situationToPrompt(situation)
 
-      if (!selectedFile) {
+        await streamResponse(prompt, imageFile)
+      } catch (error) {
+        console.error("Error during file selection or streaming:", error)
         toast({
-          description: "ファイルが選択されませんでした。",
-          status: "warning",
+          description: "エラーが発生しました。もう一度お試しください。",
+          status: "error",
           isClosable: true,
           position: "top",
         })
-        return
       }
-
-      setImage(selectedFile)
-
-      const prompt = situationToPrompt(situation)
-
-      await streamResponse(prompt)
-    } catch (error) {
-      console.error("Error during file selection or streaming:", error)
-      toast({
-        description: "エラーが発生しました。もう一度お試しください。",
-        status: "error",
-        isClosable: true,
-        position: "top",
-      })
     }
-  }, [situation, streamResponse, setImage, toast])
+  }, [situation, streamResponse, toast])
 
   const checkResult = useMemo((): AppearanceCheckProps | undefined => {
     if (isLoading) {
@@ -143,13 +142,13 @@ export default function Home() {
 
         <HStack alignItems="flex-start">
           <Box w="60%" p={4}>
-            <LeftPanel
-              situation={situation}
-              streamResponse={streamResponse}
-              image={image}
-              handleImageChange={handleImageChange}
-              setImage={setImage}
-            />
+            <div style={{ width: "100%" }}>
+              {pictureUrl !== undefined ? (
+                <img src={pictureUrl} />
+              ) : (
+                <Camera ref={camera} errorMessages={{}} aspectRatio={4 / 3} />
+              )}
+            </div>
           </Box>
           <Box w="40%">
             {checkResult ? (
