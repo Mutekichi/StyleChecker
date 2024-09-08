@@ -1,20 +1,44 @@
 import { FC } from "react"
 import { AppearanceCheckItem } from "./AppearanceCheckItem"
-import { Box, VStack } from "@chakra-ui/react"
+import { Box, Center, Spinner, VStack } from "@chakra-ui/react"
+import { AppearanceCheckProps } from "@/features/Parse/types"
 
-interface JudgeResult {
-  OK: boolean
-  comment: string
+type AppearanceCheckResultViewProps = {
+  isLoading: boolean
+  result: AppearanceCheckProps | undefined
 }
 
-export interface AppearanceCheckProps {
-  dress: JudgeResult
-  grooming: JudgeResult
-  visual: JudgeResult
-}
+export const AppearanceCheckResultView: FC<AppearanceCheckResultViewProps> = ({
+  isLoading,
+  result,
+}: AppearanceCheckResultViewProps) => {
+  if (result === undefined) {
+    return (
+      <Box
+        bg="lightblue"
+        borderRadius="64px"
+        p="40px"
+        width="480px"
+        height="540px"
+      >
+        {isLoading && (
+          <Center w="100%" h="100%">
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="blue.500"
+              size="xl"
+            />
+          </Center>
+        )}
+      </Box>
+    )
+  }
+  const { dress, grooming, visual } = result
 
-export const AppearanceCheck: FC<AppearanceCheckProps> = (props) => {
-  const { dress, grooming, visual } = props
+  console.log(result)
+  console.log(dress)
 
   return (
     <Box bg="white" borderRadius="64px" p="40px" width="480px" height="540px">

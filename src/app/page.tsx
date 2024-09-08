@@ -1,77 +1,59 @@
 "use client"
 
+import { AppearanceCheckResultView } from "@/components/AppearanceCheck"
 import { LeftPanel } from "@/components/LeftPanel"
-import { RightPanel, RightPanelProps } from "@/components/RightPanel"
+import { parseAppearanceCheck } from "@/features/Parse"
+import { AppearanceCheckProps } from "@/features/Parse/types"
 import { Situation, situationToPrompt } from "@/features/Situation"
 import { useClaude } from "@/hooks/useClaude"
 import { ChevronDownIcon } from "@chakra-ui/icons"
 import {
   Box,
+  Center,
   HStack,
   Icon,
   IconButton,
   Select,
+  Spinner,
   Text,
   useToast,
   VStack,
 } from "@chakra-ui/react"
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { FaCameraRetro } from "react-icons/fa"
 
-const rightPanelProps: RightPanelProps = {
-  advisorBubblePropsList: [
-    { emotion: "happy", text: "Hello!", isSpeaking: true },
-    { emotion: "angry", text: "Go away!" },
-    {
-      emotion: "neutral",
-      text: "吾輩は猫である。名前はまだ無い。どこで生れたかとんと見当がつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。吾輩はここで始めて人間というものを見た。しかもあとで聞くとそれは書生という人間中で一番獰悪な種族であったそうだ。この書生というのは時々我々を捕えて煮て食うという話である。しかしその当時は何という考もなかったから別段恐しいとも思わなかった。ただ彼の掌に載せられてスーと持ち上げられた時何だかフワフワした感じがあったばかりである。掌の上で少し落ちついて書生の顔を見たのがいわゆる人間というものの見始であろう。この時妙なものだと思った感じが今でも残っている。第一毛をもって装飾されべきはずの顔がつるつるしてまるで薬缶だ。",
-    },
-  ],
-}
-
 export default function Home() {
-  const { streamResponse, image, setImage, handleImageChange } = useClaude()
+  const {
+    streamResponse,
+    image,
+    setImage,
+    handleImageChange,
+    isLoading,
+    output,
+  } = useClaude()
   const toast = useToast()
   const [situation, setSituation] = useState<Situation | undefined>(undefined)
 
   const onChangeSituation = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = event.target
     if (value === "") {
-      // 未選択の状態に戻ったケース
       setSituation(undefined)
       return
     }
     setSituation(value as Situation)
   }
 
-  // const handleCheckButtonClick = useCallback(async () => {
-  //   // validation
-  //   if (image == null) {
-  //     toast({
-  //       description: "画像を選択してください。",
-  //       status: "error",
-  //       isClosable: true,
-  //       position: "top",
-  //     })
-  //     return
-  //   }
-  //   if (situation === undefined) {
-  //     toast({
-  //       description: "シチュエーションを選択してください。",
-  //       status: "error",
-  //       isClosable: true,
-  //       position: "top",
-  //     })
-  //     return
-  //   }
-
-  //   const prompt = situationToPrompt(situation)
-
-  //   streamResponse(prompt)
-  // }, [image, situation, streamResponse, toast])
-
   const handleCheckButtonClick = useCallback(async () => {
-    // ファイル選択ダイアログを開く関数
+    if (situation === undefined) {
+      toast({
+        description: "シチュエーションを選択してください。",
+        status: "error",
+        isClosable: true,
+        position: "top",
+      })
+      return
+    }
+
     const selectFile = (): Promise<File | null> => {
       return new Promise((resolve) => {
         const input = document.createElement("input")
@@ -86,7 +68,6 @@ export default function Home() {
     }
 
     try {
-      // ファイル選択ダイアログを開く
       const selectedFile = await selectFile()
 
       if (!selectedFile) {
@@ -99,22 +80,10 @@ export default function Home() {
         return
       }
 
-      // 選択されたファイルをセット
       setImage(selectedFile)
 
-      // シチュエーションのバリデーション
-      if (situation === undefined) {
-        toast({
-          description: "シチュエーションを選択してください。",
-          status: "error",
-          isClosable: true,
-          position: "top",
-        })
-        return
-      }
-
-      // プロンプトの生成とストリームの開始
       const prompt = situationToPrompt(situation)
+
       await streamResponse(prompt)
     } catch (error) {
       console.error("Error during file selection or streaming:", error)
@@ -126,6 +95,14 @@ export default function Home() {
       })
     }
   }, [situation, streamResponse, setImage, toast])
+
+  const checkResult = useMemo((): AppearanceCheckProps | undefined => {
+    if (isLoading) {
+      return undefined
+    }
+    console.log(parseAppearanceCheck(output))
+    return parseAppearanceCheck(output)
+  }, [isLoading, output])
 
   return (
     <Box
@@ -152,7 +129,6 @@ export default function Home() {
             icon={<Icon as={ChevronDownIcon} color="gray.500" w={6} h={6} />}
             iconSize="24px"
             sx={{
-              // カスタムスタイルをここに追加
               "& > option": {
                 background: "white",
                 color: "black",
@@ -176,7 +152,32 @@ export default function Home() {
             />
           </Box>
           <Box w="40%">
-            <RightPanel {...rightPanelProps} />
+            {checkResult ? (
+              <AppearanceCheckResultView
+                isLoading={isLoading}
+                result={checkResult}
+              />
+            ) : (
+              <Box
+                bg="lightblue"
+                borderRadius="64px"
+                p="40px"
+                width="480px"
+                height="540px"
+              >
+                {isLoading && (
+                  <Center w="100%" h="100%">
+                    <Spinner
+                      thickness="4px"
+                      speed="0.65s"
+                      emptyColor="gray.200"
+                      color="blue.500"
+                      size="xl"
+                    />
+                  </Center>
+                )}
+              </Box>
+            )}
           </Box>
         </HStack>
         <IconButton

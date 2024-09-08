@@ -20,15 +20,9 @@ type LeftPanelInput = Pick<
   situation: Situation | undefined
 }
 
-export function LeftPanel({
-  situation,
-  streamResponse,
-  image,
-  setImage,
-  handleImageChange,
-}: LeftPanelInput) {
+export function LeftPanel({ image }: LeftPanelInput) {
   return (
-    <VStack spacing={4} justifyContent="flex-start" w="100%">
+    <VStack spacing={4} justifyContent="flex-start" w="100%" height="500px">
       {/* TODO: ドロップゾーンを追加する */}
       <Box>
         <Image
