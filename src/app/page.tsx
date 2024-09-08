@@ -163,7 +163,7 @@ export default function Home() {
               />
             ) : (
               <Box
-                bg="lightblue"
+                bg="white"
                 borderRadius="64px"
                 p="40px"
                 width="480px"
