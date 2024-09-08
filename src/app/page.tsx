@@ -142,7 +142,7 @@ export default function Home() {
 
         <HStack alignItems="flex-start" w="100%">
           <Box w="60%" p={4} display="flex" alignItems="flex-start">
-            <div style={{ width: "100%", height: "100%" }}>
+            <div style={{ width: "100%" }}>
               {pictureUrl !== undefined ? (
                 <img src={pictureUrl} />
               ) : (

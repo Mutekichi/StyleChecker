@@ -1,5 +1,12 @@
 import { ChakraProvider } from "@chakra-ui/react"
 import type { Metadata } from "next"
+import localFont from "next/font/local"
+
+const notoSans = localFont({
+  src: "../../public/fonts/NotoSansSymbols-VariableFont_wght.ttf",
+  variable: "--font-geist-sans",
+  weight: "100 900",
+})
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -13,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body>
+      <body className={`${notoSans.variable} antialiased`}>
         <ChakraProvider>{children}</ChakraProvider>
       </body>
     </html>
