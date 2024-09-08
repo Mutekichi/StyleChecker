@@ -8,6 +8,7 @@ export interface UseClaudeReturn {
   isLoading: boolean
   streamResponse: (prompt: string) => Promise<void>
   handleImageChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  setImage: React.Dispatch<React.SetStateAction<File | null>>
   image: File | null
   clearImage: () => void
 }
@@ -80,6 +81,7 @@ export const useClaude = (): UseClaudeReturn => {
     streamResponse,
     handleImageChange,
     image,
+    setImage,
     clearImage,
   }
 }
