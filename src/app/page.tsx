@@ -79,7 +79,6 @@ export default function Home() {
           return
         }
 
-        const imageUrl = URL.createObjectURL(imageFile)
         const prompt = situationToPrompt(situation)
 
         await streamResponse(prompt, imageFile)
@@ -140,11 +139,17 @@ export default function Home() {
           </Select>
         </Box>
 
-        <HStack alignItems="flex-start" w="100%">
-          <Box w="60%" p={4} display="flex" alignItems="flex-start">
+        <HStack alignItems="center" justifyContent="center" w="100%">
+          <Box w="600px" p={4} display="flex" alignItems="center">
             <div style={{ width: "100%", height: "100%" }}>
               {pictureUrl !== undefined ? (
-                <img src={pictureUrl} />
+                <img
+                  src={pictureUrl}
+                  style={
+                    // 左右反転
+                    { transform: "scaleX(-1)" }
+                  }
+                />
               ) : (
                 <Camera ref={camera} errorMessages={{}} aspectRatio={4 / 3} />
               )}
