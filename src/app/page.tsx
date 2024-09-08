@@ -18,7 +18,7 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react"
-import { Fragment, useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { FaCameraRetro } from "react-icons/fa"
 import { Camera, CameraType } from "react-camera-pro"
 import { downloadImageAsFile } from "@/utils/download"
@@ -140,9 +140,9 @@ export default function Home() {
           </Select>
         </Box>
 
-        <HStack alignItems="flex-start">
-          <Box w="60%" p={4}>
-            <div style={{ width: "100%" }}>
+        <HStack alignItems="flex-start" w="100%">
+          <Box w="60%" p={4} display="flex" alignItems="flex-start">
+            <div style={{ width: "100%", height: "100%" }}>
               {pictureUrl !== undefined ? (
                 <img src={pictureUrl} />
               ) : (
