@@ -41,7 +41,7 @@ export const AppearanceCheckResultView: FC<AppearanceCheckResultViewProps> = ({
   console.log(dress)
 
   return (
-    <Box bg="white" borderRadius="64px" p="40px" width="480px" height="540px">
+    <Box bg="white" borderRadius="64px" p="40px" width="480px">
       <VStack spacing={3} align="start" gap="20px">
         <AppearanceCheckItem
           title="服装"
