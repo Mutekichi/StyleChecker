@@ -1,5 +1,7 @@
 "use client"
 
+import { ClaudeUI } from "./ClaudeUI"
+
 import { AdvisorBubble, AdvisorBubbleProps } from "./AdvisorBubble"
 
 export interface RightPanelProps {
