@@ -117,7 +117,7 @@ export default function Home() {
         <Box w="50%">
           <Select
             borderRadius="full"
-            placeholder="シチュエーションを選択"
+            placeholder="今日はどこに行くのかな？🤔✨"
             fontSize="x-large"
             fontWeight="normal"
             onChange={onChangeSituation}
