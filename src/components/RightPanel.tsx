@@ -2,10 +2,20 @@
 
 import { ClaudeUI } from "./ClaudeUI"
 
-export function RightPanel() {
+import { AdvisorBubble, AdvisorBubbleProps } from "./AdvisorBubble"
+
+export interface RightPanelProps {
+  advisorBubblePropsList: AdvisorBubbleProps[]
+}
+
+export function RightPanel(props: RightPanelProps) {
+  const { advisorBubblePropsList } = props
+
   return (
-    <div>
-      <ClaudeUI />
-    </div>
+    <>
+      {advisorBubblePropsList.map((props, index) => (
+        <AdvisorBubble key={index} {...props} />
+      ))}
+    </>
   )
 }
