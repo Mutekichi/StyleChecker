@@ -6,28 +6,15 @@ const API_BASE_URL =
 export interface UseClaudeReturn {
   output: string
   isLoading: boolean
-  streamResponse: (prompt: string) => Promise<void>
-  handleImageChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-  setImage: React.Dispatch<React.SetStateAction<File | null>>
-  image: File | null
-  clearImage: () => void
+  streamResponse: (prompt: string, image: File) => Promise<void>
 }
 
 export const useClaude = (): UseClaudeReturn => {
   const [output, setOutput] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [image, setImage] = useState<File | null>(null)
-
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setImage(event.target.files[0])
-      return
-    }
-    console.error("files are empty.")
-  }
 
   const streamResponse = useCallback(
-    async (prompt: string): Promise<void> => {
+    async (prompt: string, image: File): Promise<void> => {
       setIsLoading(true)
       setOutput("")
 
@@ -68,20 +55,12 @@ export const useClaude = (): UseClaudeReturn => {
         setIsLoading(false)
       }
     },
-    [image]
+    []
   )
-
-  const clearImage = (): void => {
-    setImage(null)
-  }
 
   return {
     output,
     isLoading,
     streamResponse,
-    handleImageChange,
-    image,
-    setImage,
-    clearImage,
   }
 }
