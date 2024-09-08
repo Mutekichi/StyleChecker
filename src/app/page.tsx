@@ -133,9 +133,9 @@ export default function Home() {
               },
             }}
           >
-            <option value="friend">友達とお出かけ</option>
+            <option value="friend">今日は友達と楽しくお出かけ✨😊</option>
             <option value="date">今日はこれからデート❤️😍</option>
-            <option value="boss">上司と会食</option>
+            <option value="boss">今日は上司と会食💼🍽</option>
           </Select>
         </Box>
 
