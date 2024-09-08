@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { useClaude } from "@/hooks/useClaude"
 import {
   Box,
@@ -13,8 +13,6 @@ import {
 
 export const ClaudeUI: React.FC = () => {
   const {
-    input,
-    setInput,
     output,
     isLoading,
     streamResponse,
@@ -22,6 +20,8 @@ export const ClaudeUI: React.FC = () => {
     image,
     clearImage,
   } = useClaude()
+
+  const [input, setInput] = useState("")
 
   return (
     <VStack
@@ -51,7 +51,7 @@ export const ClaudeUI: React.FC = () => {
         </Box>
       )}
       <Button
-        onClick={streamResponse}
+        onClick={() => streamResponse(input)}
         isLoading={isLoading}
         loadingText="Processing..."
         colorScheme="blue"

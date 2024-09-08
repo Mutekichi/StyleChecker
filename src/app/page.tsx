@@ -2,6 +2,7 @@
 
 import { LeftPanel } from "@/components/LeftPanel"
 import { RightPanel, RightPanelProps } from "@/components/RightPanel"
+import { useClaude } from "@/hooks/useClaude"
 import { Box, HStack } from "@chakra-ui/react"
 
 const rightPanelProps: RightPanelProps = {
@@ -16,16 +17,26 @@ const rightPanelProps: RightPanelProps = {
 }
 
 export default function Home() {
+  const {
+    output,
+    isLoading,
+    streamResponse,
+    image,
+    handleImageChange,
+    clearImage,
+  } = useClaude()
   return (
-    <div>
-      <HStack>
-        <Box w="60%" p={4}>
-          <LeftPanel />
-        </Box>
-        <Box w="40%">
-          <RightPanel {...rightPanelProps} />
-        </Box>
-      </HStack>
-    </div>
+    <HStack alignItems="flex-start">
+      <Box w="60%" p={4}>
+        <LeftPanel
+          streamResponse={streamResponse}
+          image={image}
+          handleImageChange={handleImageChange}
+        />
+      </Box>
+      <Box w="40%">
+        <RightPanel {...rightPanelProps} />
+      </Box>
+    </HStack>
   )
 }
