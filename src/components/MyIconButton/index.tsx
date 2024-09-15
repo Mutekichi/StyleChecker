@@ -1,13 +1,14 @@
-import { IconButton } from "@chakra-ui/react"
+import { IconButton, IconButtonProps } from "@chakra-ui/react"
 import { FC, ReactElement, JSXElementConstructor } from "react"
 
-interface MyIconButtonProps {
+interface MyIconButtonProps extends Omit<IconButtonProps, "aria-label"> {
   onClick: () => void
   icon: ReactElement<any, string | JSXElementConstructor<any>> | undefined
   ariaLabel: string
 }
+
 export const MyIconButton: FC<MyIconButtonProps> = (props) => {
-  const { onClick, icon, ariaLabel } = props
+  const { onClick, icon, ariaLabel, ...rest } = props
 
   return (
     <IconButton
@@ -17,6 +18,7 @@ export const MyIconButton: FC<MyIconButtonProps> = (props) => {
       boxSize="100px"
       fontSize="40px"
       onClick={onClick}
+      {...rest}
     />
   )
 }

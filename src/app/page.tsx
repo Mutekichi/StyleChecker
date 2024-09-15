@@ -8,6 +8,7 @@ import { useClaude } from "@/hooks/useClaude"
 import {
   Box,
   Flex,
+  HStack,
   Image,
   useMediaQuery,
   useToast,
@@ -21,6 +22,8 @@ import { Title } from "@/components/Title"
 import { SituationSelector } from "@/components/SituationSelector"
 import { Loading } from "@/components/Loading"
 import { MyIconButton } from "@/components/MyIconButton"
+import { TwitterShareButton } from "@/components/TwitterShareButton"
+import { generateShareText } from "@/features/Tweet"
 
 export default function Home() {
   const { streamResponse, isLoading, output, reset } = useClaude()
@@ -163,11 +166,19 @@ export default function Home() {
           </Flex>
         </Flex>
         {takenPicture ? (
-          <MyIconButton
-            onClick={handleRetryButtonClick}
-            icon={<FaRedo />}
-            ariaLabel="Retry"
-          />
+          <HStack>
+            <MyIconButton
+              onClick={handleRetryButtonClick}
+              icon={<FaRedo />}
+              ariaLabel="Retry"
+            />
+            {checkResult && (
+              <TwitterShareButton
+                url={window.location.href}
+                text={generateShareText(checkResult)}
+              />
+            )}
+          </HStack>
         ) : (
           <MyIconButton
             onClick={handleCheckButtonClick}
