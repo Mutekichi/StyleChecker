@@ -1,5 +1,5 @@
 import { FC } from "react"
-import { AppearanceCheckItem } from "./AppearanceCheckItem"
+import { AppearanceCheckItem } from "@/components/AppearanceCheck/AppearanceCheckItem"
 import { Box, Center, Spinner, VStack } from "@chakra-ui/react"
 import { AppearanceCheckProps } from "@/features/Parse/types"
 
@@ -36,9 +36,6 @@ export const AppearanceCheckResultView: FC<AppearanceCheckResultViewProps> = ({
     )
   }
   const { dress, grooming, visual } = result
-
-  console.log(result)
-  console.log(dress)
 
   return (
     <Box bg="white" borderRadius="64px" p="40px" width="480px">

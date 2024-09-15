@@ -12,6 +12,7 @@ import {
   HStack,
   Icon,
   IconButton,
+  Image,
   Select,
   Spinner,
   Text,
@@ -28,8 +29,8 @@ export default function Home() {
   const toast = useToast()
   const camera = useRef<CameraType>(null)
   const [situation, setSituation] = useState<Situation | undefined>(undefined)
-
   const [takenPicture, setTakenPicture] = useState<File | undefined>(undefined)
+
   const pictureUrl = useMemo(() => {
     if (takenPicture === undefined) {
       return undefined
@@ -63,12 +64,7 @@ export default function Home() {
       const imageFile = await downloadImageAsFile(imageUrl)
       setTakenPicture(imageFile)
 
-      console.log(
-        imageFile === undefined ? "undefined image" : "defined Image!"
-      )
       try {
-        // const selectedFile = await selectFile()
-
         if (!imageFile) {
           toast({
             description: "ファイルが選択されませんでした。",
@@ -143,12 +139,11 @@ export default function Home() {
           <Box w="600px" p={4} display="flex" alignItems="center">
             <div style={{ width: "100%", height: "100%" }}>
               {pictureUrl !== undefined ? (
-                <img
+                <Image
                   src={pictureUrl}
-                  style={
-                    // 左右反転
-                    { transform: "scaleX(-1)" }
-                  }
+                  alt="Uploaded"
+                  maxHeight="200px"
+                  style={{ transform: "scaleX(-1)" }}
                 />
               ) : (
                 <Camera ref={camera} errorMessages={{}} aspectRatio={4 / 3} />
