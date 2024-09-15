@@ -7,9 +7,9 @@ import { Situation, situationToPrompt } from "@/features/Situation"
 import { useClaude } from "@/hooks/useClaude"
 import {
   Box,
-  HStack,
-  IconButton,
+  Flex,
   Image,
+  useMediaQuery,
   useToast,
   VStack,
 } from "@chakra-ui/react"
@@ -20,6 +20,7 @@ import { downloadImageAsFile } from "@/utils/download"
 import { Title } from "@/components/Title"
 import { SituationSelector } from "@/components/SituationSelector"
 import { Loading } from "@/components/Loading"
+import { MyIconButton } from "@/components/MyIconButton"
 
 export default function Home() {
   const { streamResponse, isLoading, output, reset } = useClaude()
@@ -27,6 +28,8 @@ export default function Home() {
   const camera = useRef<CameraType>(null)
   const [situation, setSituation] = useState<Situation | undefined>(undefined)
   const [takenPicture, setTakenPicture] = useState<File | undefined>(undefined)
+
+  const [isLargerThan768] = useMediaQuery("(min-width: 768px)")
 
   const pictureUrl = useMemo(() => {
     if (takenPicture === undefined) {
@@ -98,66 +101,78 @@ export default function Home() {
     }
     return parseAppearanceCheck(output)
   }, [isLoading, output])
-
   return (
     <Box
       bgGradient="linear(to-r, #89aaff, #8bfff8)"
       minHeight="100vh"
       width="100%"
-      p={20}
+      p={4}
     >
       <VStack spacing={10}>
         <Title />
-        <Box w="50%" minW="500px">
+        <Box w={isLargerThan768 ? "50%" : "90%"} minW="300px">
           <SituationSelector onChangeSituation={onChangeSituation} />
         </Box>
-        <HStack
-          alignItems="center"
-          justifyContent="center"
-          w="100%"
-          minH="432px"
-        >
-          <Box w="100%" h="100%" borderRadius="32px" overflow="hidden">
+        <Flex w="100%" direction={isLargerThan768 ? "row" : "column"} gap={4}>
+          <Box w={isLargerThan768 ? "60%" : "100%"}>
             {pictureUrl !== undefined ? (
-              <Image
-                src={pictureUrl}
-                alt="Uploaded"
-                style={{ transform: "scaleX(-1)" }}
-              />
+              <Box borderRadius="32px" overflow="hidden">
+                <Image
+                  src={pictureUrl}
+                  alt="Uploaded"
+                  style={{
+                    transform: "scaleX(-1)",
+                    width: "100%",
+                    height: "auto",
+                  }}
+                />
+              </Box>
             ) : (
-              <Camera ref={camera} errorMessages={{}} aspectRatio={4 / 3} />
+              <Box borderRadius="32px" overflow="hidden">
+                <Camera
+                  ref={camera}
+                  errorMessages={{
+                    noCameraAccessible: "カメラが使えないみたい🥺",
+                    permissionDenied: "カメラが使えないみたい🥺",
+                    switchCamera: "カメラが使えないみたい🥺",
+                    canvas: "カメラが表示できないみたい🥺",
+                  }}
+                  aspectRatio={4 / 3}
+                />
+              </Box>
             )}
           </Box>
-          <Box w="40%">
-            <Box bg="white" borderRadius="64px" p="40px" w="480px" h="100%">
-              {isLoading && !checkResult ? (
-                <Loading />
-              ) : (
-                <AppearanceCheckResultView
-                  isLoading={isLoading}
-                  result={checkResult}
-                />
-              )}
-            </Box>
-          </Box>
-        </HStack>
+          <Flex
+            w={isLargerThan768 ? "38%" : "100%"}
+            direction="column"
+            bg="white"
+            borderRadius="32px"
+            p="32px"
+            overflow="auto"
+          >
+            {isLoading ? (
+              <Loading />
+            ) : checkResult ? (
+              <AppearanceCheckResultView
+                result={checkResult}
+                isLoading={isLoading}
+              />
+            ) : (
+              <Box flex="1" />
+            )}
+          </Flex>
+        </Flex>
         {takenPicture ? (
-          <IconButton
-            aria-label="Retry"
-            icon={<FaRedo />}
-            borderRadius="full"
-            boxSize="100px"
-            fontSize="40px"
+          <MyIconButton
             onClick={handleRetryButtonClick}
+            icon={<FaRedo />}
+            ariaLabel="Retry"
           />
         ) : (
-          <IconButton
-            aria-label="Picture"
-            icon={<FaCameraRetro />}
-            borderRadius="full"
-            boxSize="100px"
-            fontSize="40px"
+          <MyIconButton
             onClick={handleCheckButtonClick}
+            icon={<FaCameraRetro />}
+            ariaLabel="Check"
           />
         )}
       </VStack>
