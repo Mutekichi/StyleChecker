@@ -38,24 +38,22 @@ export const AppearanceCheckResultView: FC<AppearanceCheckResultViewProps> = ({
   const { dress, grooming, visual } = result
 
   return (
-    <Box bg="white" borderRadius="64px" p="40px" width="480px">
-      <VStack spacing={3} align="start" gap="20px">
-        <AppearanceCheckItem
-          title="服装"
-          description={dress.comment}
-          ok={dress.OK}
-        />
-        <AppearanceCheckItem
-          title="身だしなみ"
-          description={grooming.comment}
-          ok={grooming.OK}
-        />
-        <AppearanceCheckItem
-          title="びじゅ"
-          description={visual.comment}
-          ok={visual.OK}
-        />
-      </VStack>
-    </Box>
+    <VStack spacing={3} align="start" gap="20px">
+      <AppearanceCheckItem
+        title="服装"
+        description={dress.comment}
+        ok={dress.OK}
+      />
+      <AppearanceCheckItem
+        title="身だしなみ"
+        description={grooming.comment}
+        ok={grooming.OK}
+      />
+      <AppearanceCheckItem
+        title="びじゅ"
+        description={visual.comment}
+        ok={visual.OK}
+      />
+    </VStack>
   )
 }

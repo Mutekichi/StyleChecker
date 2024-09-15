@@ -21,6 +21,7 @@ import { Camera, CameraType } from "react-camera-pro"
 import { downloadImageAsFile } from "@/utils/download"
 import { Title } from "@/components/Title"
 import { SituationSelector } from "@/components/SituationSelector"
+import { Loading } from "@/components/Loading"
 
 export default function Home() {
   const { streamResponse, isLoading, output } = useClaude()
@@ -124,32 +125,16 @@ export default function Home() {
             </div>
           </Box>
           <Box w="40%">
-            {checkResult ? (
-              <AppearanceCheckResultView
-                isLoading={isLoading}
-                result={checkResult}
-              />
-            ) : (
-              <Box
-                bg="white"
-                borderRadius="64px"
-                p="40px"
-                width="480px"
-                height="540px"
-              >
-                {isLoading && (
-                  <Center w="100%" h="100%">
-                    <Spinner
-                      thickness="4px"
-                      speed="0.65s"
-                      emptyColor="gray.200"
-                      color="blue.500"
-                      size="xl"
-                    />
-                  </Center>
-                )}
-              </Box>
-            )}
+            <Box bg="white" borderRadius="64px" p="40px" width="480px">
+              {isLoading ? (
+                <Loading />
+              ) : (
+                <AppearanceCheckResultView
+                  isLoading={isLoading}
+                  result={checkResult}
+                />
+              )}
+            </Box>
           </Box>
         </HStack>
         <IconButton
