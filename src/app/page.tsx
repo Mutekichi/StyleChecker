@@ -5,17 +5,13 @@ import { parseAppearanceCheck } from "@/features/Parse"
 import { AppearanceCheckProps } from "@/features/Parse/types"
 import { Situation, situationToPrompt } from "@/features/Situation"
 import { useClaude } from "@/hooks/useClaude"
-import { ChevronDownIcon } from "@chakra-ui/icons"
 import {
   Box,
   Center,
   HStack,
-  Icon,
   IconButton,
   Image,
-  Select,
   Spinner,
-  Text,
   useToast,
   VStack,
 } from "@chakra-ui/react"
@@ -23,6 +19,8 @@ import { useCallback, useMemo, useRef, useState } from "react"
 import { FaCameraRetro } from "react-icons/fa"
 import { Camera, CameraType } from "react-camera-pro"
 import { downloadImageAsFile } from "@/utils/download"
+import { Title } from "@/components/Title"
+import { SituationSelector } from "@/components/SituationSelector"
 
 export default function Home() {
   const { streamResponse, isLoading, output } = useClaude()
@@ -94,7 +92,6 @@ export default function Home() {
     if (isLoading) {
       return undefined
     }
-    console.log(parseAppearanceCheck(output))
     return parseAppearanceCheck(output)
   }, [isLoading, output])
 
@@ -104,35 +101,11 @@ export default function Home() {
       minHeight="100vh"
       width="100%"
       p={20}
-      letterSpacing={5}
     >
       <VStack spacing={10}>
-        <Text fontSize="xxx-large" fontWeight="bold" color="white">
-          みだしなみチェッカー
-        </Text>
+        <Title />
         <Box w="50%">
-          <Select
-            borderRadius="full"
-            placeholder="今日はどこに行くのかな？🤔✨"
-            fontSize="x-large"
-            fontWeight="normal"
-            onChange={onChangeSituation}
-            backgroundColor="white"
-            textAlign="center"
-            h={20}
-            icon={<Icon as={ChevronDownIcon} color="gray.500" w={6} h={6} />}
-            iconSize="24px"
-            sx={{
-              "& > option": {
-                background: "white",
-                color: "black",
-              },
-            }}
-          >
-            <option value="friend">今日は友達と楽しくお出かけ✨😊</option>
-            <option value="date">今日はこれからデート❤️😍</option>
-            <option value="boss">今日は上司と会食💼🍽</option>
-          </Select>
+          <SituationSelector onChangeSituation={onChangeSituation} />
         </Box>
 
         <HStack alignItems="center" justifyContent="center" w="100%">
