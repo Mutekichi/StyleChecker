@@ -7,16 +7,14 @@ import { Situation, situationToPrompt } from "@/features/Situation"
 import { useClaude } from "@/hooks/useClaude"
 import {
   Box,
-  Center,
   HStack,
   IconButton,
   Image,
-  Spinner,
   useToast,
   VStack,
 } from "@chakra-ui/react"
 import { useCallback, useMemo, useRef, useState } from "react"
-import { FaCameraRetro } from "react-icons/fa"
+import { FaCameraRetro, FaRedo } from "react-icons/fa"
 import { Camera, CameraType } from "react-camera-pro"
 import { downloadImageAsFile } from "@/utils/download"
 import { Title } from "@/components/Title"
@@ -24,7 +22,7 @@ import { SituationSelector } from "@/components/SituationSelector"
 import { Loading } from "@/components/Loading"
 
 export default function Home() {
-  const { streamResponse, isLoading, output } = useClaude()
+  const { streamResponse, isLoading, output, reset } = useClaude()
   const toast = useToast()
   const camera = useRef<CameraType>(null)
   const [situation, setSituation] = useState<Situation | undefined>(undefined)
@@ -89,6 +87,11 @@ export default function Home() {
     }
   }, [situation, streamResponse, toast])
 
+  const handleRetryButtonClick = useCallback(() => {
+    setTakenPicture(undefined)
+    reset()
+  }, [reset])
+
   const checkResult = useMemo((): AppearanceCheckProps | undefined => {
     if (isLoading) {
       return undefined
@@ -105,28 +108,29 @@ export default function Home() {
     >
       <VStack spacing={10}>
         <Title />
-        <Box w="50%">
+        <Box w="50%" minW="500px">
           <SituationSelector onChangeSituation={onChangeSituation} />
         </Box>
-
-        <HStack alignItems="center" justifyContent="center" w="100%">
-          <Box w="600px" p={4} display="flex" alignItems="center">
-            <div style={{ width: "100%", height: "100%" }}>
-              {pictureUrl !== undefined ? (
-                <Image
-                  src={pictureUrl}
-                  alt="Uploaded"
-                  maxHeight="200px"
-                  style={{ transform: "scaleX(-1)" }}
-                />
-              ) : (
-                <Camera ref={camera} errorMessages={{}} aspectRatio={4 / 3} />
-              )}
-            </div>
+        <HStack
+          alignItems="center"
+          justifyContent="center"
+          w="100%"
+          minH="432px"
+        >
+          <Box w="100%" h="100%" borderRadius="32px" overflow="hidden">
+            {pictureUrl !== undefined ? (
+              <Image
+                src={pictureUrl}
+                alt="Uploaded"
+                style={{ transform: "scaleX(-1)" }}
+              />
+            ) : (
+              <Camera ref={camera} errorMessages={{}} aspectRatio={4 / 3} />
+            )}
           </Box>
           <Box w="40%">
-            <Box bg="white" borderRadius="64px" p="40px" width="480px">
-              {isLoading ? (
+            <Box bg="white" borderRadius="64px" p="40px" w="480px" h="100%">
+              {isLoading && !checkResult ? (
                 <Loading />
               ) : (
                 <AppearanceCheckResultView
@@ -137,14 +141,25 @@ export default function Home() {
             </Box>
           </Box>
         </HStack>
-        <IconButton
-          aria-label="Picture"
-          icon={<FaCameraRetro />}
-          borderRadius="full"
-          boxSize="100px"
-          fontSize="40px"
-          onClick={handleCheckButtonClick}
-        />
+        {takenPicture ? (
+          <IconButton
+            aria-label="Retry"
+            icon={<FaRedo />}
+            borderRadius="full"
+            boxSize="100px"
+            fontSize="40px"
+            onClick={handleRetryButtonClick}
+          />
+        ) : (
+          <IconButton
+            aria-label="Picture"
+            icon={<FaCameraRetro />}
+            borderRadius="full"
+            boxSize="100px"
+            fontSize="40px"
+            onClick={handleCheckButtonClick}
+          />
+        )}
       </VStack>
     </Box>
   )

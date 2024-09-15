@@ -1,6 +1,6 @@
 import { FC } from "react"
 import { AppearanceCheckItem } from "@/components/AppearanceCheck/AppearanceCheckItem"
-import { Box, Center, Spinner, VStack } from "@chakra-ui/react"
+import { VStack } from "@chakra-ui/react"
 import { AppearanceCheckProps } from "@/features/Parse/types"
 
 type AppearanceCheckResultViewProps = {
@@ -9,36 +9,15 @@ type AppearanceCheckResultViewProps = {
 }
 
 export const AppearanceCheckResultView: FC<AppearanceCheckResultViewProps> = ({
-  isLoading,
   result,
 }: AppearanceCheckResultViewProps) => {
   if (result === undefined) {
-    return (
-      <Box
-        bg="lightblue"
-        borderRadius="64px"
-        p="40px"
-        width="480px"
-        height="540px"
-      >
-        {isLoading && (
-          <Center w="100%" h="100%">
-            <Spinner
-              thickness="4px"
-              speed="0.65s"
-              emptyColor="gray.200"
-              color="blue.500"
-              size="xl"
-            />
-          </Center>
-        )}
-      </Box>
-    )
+    return null
   }
   const { dress, grooming, visual } = result
 
   return (
-    <VStack spacing={3} align="start" gap="20px">
+    <VStack spacing={3} align="start" gap="20px" h="100%">
       <AppearanceCheckItem
         title="服装"
         description={dress.comment}
