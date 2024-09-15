@@ -5,31 +5,32 @@ import { parseAppearanceCheck } from "@/features/Parse"
 import { AppearanceCheckProps } from "@/features/Parse/types"
 import { Situation, situationToPrompt } from "@/features/Situation"
 import { useClaude } from "@/hooks/useClaude"
-import { ChevronDownIcon } from "@chakra-ui/icons"
 import {
   Box,
-  Center,
-  HStack,
-  Icon,
-  IconButton,
-  Select,
-  Spinner,
-  Text,
+  Flex,
+  Image,
+  useMediaQuery,
   useToast,
   VStack,
 } from "@chakra-ui/react"
 import { useCallback, useMemo, useRef, useState } from "react"
-import { FaCameraRetro } from "react-icons/fa"
+import { FaCameraRetro, FaRedo } from "react-icons/fa"
 import { Camera, CameraType } from "react-camera-pro"
 import { downloadImageAsFile } from "@/utils/download"
+import { Title } from "@/components/Title"
+import { SituationSelector } from "@/components/SituationSelector"
+import { Loading } from "@/components/Loading"
+import { MyIconButton } from "@/components/MyIconButton"
 
 export default function Home() {
-  const { streamResponse, isLoading, output } = useClaude()
+  const { streamResponse, isLoading, output, reset } = useClaude()
   const toast = useToast()
   const camera = useRef<CameraType>(null)
   const [situation, setSituation] = useState<Situation | undefined>(undefined)
-
   const [takenPicture, setTakenPicture] = useState<File | undefined>(undefined)
+
+  const [isLargerThan768] = useMediaQuery("(min-width: 768px)")
+
   const pictureUrl = useMemo(() => {
     if (takenPicture === undefined) {
       return undefined
@@ -63,12 +64,7 @@ export default function Home() {
       const imageFile = await downloadImageAsFile(imageUrl)
       setTakenPicture(imageFile)
 
-      console.log(
-        imageFile === undefined ? "undefined image" : "defined Image!"
-      )
       try {
-        // const selectedFile = await selectFile()
-
         if (!imageFile) {
           toast({
             description: "ファイルが選択されませんでした。",
@@ -94,104 +90,91 @@ export default function Home() {
     }
   }, [situation, streamResponse, toast])
 
+  const handleRetryButtonClick = useCallback(() => {
+    setTakenPicture(undefined)
+    reset()
+  }, [reset])
+
   const checkResult = useMemo((): AppearanceCheckProps | undefined => {
     if (isLoading) {
       return undefined
     }
-    console.log(parseAppearanceCheck(output))
     return parseAppearanceCheck(output)
   }, [isLoading, output])
-
   return (
     <Box
       bgGradient="linear(to-r, #89aaff, #8bfff8)"
       minHeight="100vh"
       width="100%"
-      p={20}
-      letterSpacing={5}
+      p={4}
     >
       <VStack spacing={10}>
-        <Text fontSize="xxx-large" fontWeight="bold" color="white">
-          みだしなみチェッカー
-        </Text>
-        <Box w="50%">
-          <Select
-            borderRadius="full"
-            placeholder="今日はどこに行くのかな？🤔✨"
-            fontSize="x-large"
-            fontWeight="normal"
-            onChange={onChangeSituation}
-            backgroundColor="white"
-            textAlign="center"
-            h={20}
-            icon={<Icon as={ChevronDownIcon} color="gray.500" w={6} h={6} />}
-            iconSize="24px"
-            sx={{
-              "& > option": {
-                background: "white",
-                color: "black",
-              },
-            }}
-          >
-            <option value="friend">今日は友達と楽しくお出かけ✨😊</option>
-            <option value="date">今日はこれからデート❤️😍</option>
-            <option value="boss">今日は上司と会食💼🍽</option>
-          </Select>
+        <Title />
+        <Box w={isLargerThan768 ? "50%" : "90%"} minW="300px">
+          <SituationSelector onChangeSituation={onChangeSituation} />
         </Box>
-
-        <HStack alignItems="center" justifyContent="center" w="100%">
-          <Box w="600px" p={4} display="flex" alignItems="center">
-            <div style={{ width: "100%", height: "100%" }}>
-              {pictureUrl !== undefined ? (
-                <img
+        <Flex w="100%" direction={isLargerThan768 ? "row" : "column"} gap={4}>
+          <Box w={isLargerThan768 ? "60%" : "100%"}>
+            {pictureUrl !== undefined ? (
+              <Box borderRadius="32px" overflow="hidden">
+                <Image
                   src={pictureUrl}
-                  style={
-                    // 左右反転
-                    { transform: "scaleX(-1)" }
-                  }
+                  alt="Uploaded"
+                  style={{
+                    transform: "scaleX(-1)",
+                    width: "100%",
+                    height: "auto",
+                  }}
                 />
-              ) : (
-                <Camera ref={camera} errorMessages={{}} aspectRatio={4 / 3} />
-              )}
-            </div>
-          </Box>
-          <Box w="40%">
-            {checkResult ? (
-              <AppearanceCheckResultView
-                isLoading={isLoading}
-                result={checkResult}
-              />
+              </Box>
             ) : (
-              <Box
-                bg="white"
-                borderRadius="64px"
-                p="40px"
-                width="480px"
-                height="540px"
-              >
-                {isLoading && (
-                  <Center w="100%" h="100%">
-                    <Spinner
-                      thickness="4px"
-                      speed="0.65s"
-                      emptyColor="gray.200"
-                      color="blue.500"
-                      size="xl"
-                    />
-                  </Center>
-                )}
+              <Box borderRadius="32px" overflow="hidden">
+                <Camera
+                  ref={camera}
+                  errorMessages={{
+                    noCameraAccessible: "カメラが使えないみたい🥺",
+                    permissionDenied: "カメラが使えないみたい🥺",
+                    switchCamera: "カメラが使えないみたい🥺",
+                    canvas: "カメラが表示できないみたい🥺",
+                  }}
+                  aspectRatio={4 / 3}
+                />
               </Box>
             )}
           </Box>
-        </HStack>
-        <IconButton
-          aria-label="Picture"
-          icon={<FaCameraRetro />}
-          borderRadius="full"
-          boxSize="100px"
-          fontSize="40px"
-          onClick={handleCheckButtonClick}
-        />
+          <Flex
+            w={isLargerThan768 ? "38%" : "100%"}
+            direction="column"
+            bg="white"
+            borderRadius="32px"
+            p="32px"
+            overflow="auto"
+          >
+            {isLoading ? (
+              <Loading />
+            ) : checkResult ? (
+              <AppearanceCheckResultView
+                result={checkResult}
+                isLoading={isLoading}
+              />
+            ) : (
+              <Box flex="1" />
+            )}
+          </Flex>
+        </Flex>
+        {takenPicture ? (
+          <MyIconButton
+            onClick={handleRetryButtonClick}
+            icon={<FaRedo />}
+            ariaLabel="Retry"
+          />
+        ) : (
+          <MyIconButton
+            onClick={handleCheckButtonClick}
+            icon={<FaCameraRetro />}
+            ariaLabel="Check"
+          />
+        )}
       </VStack>
     </Box>
   )

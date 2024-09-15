@@ -7,6 +7,7 @@ export interface UseClaudeReturn {
   output: string
   isLoading: boolean
   streamResponse: (prompt: string, image: File) => Promise<void>
+  reset: () => void
 }
 
 export const useClaude = (): UseClaudeReturn => {
@@ -58,9 +59,15 @@ export const useClaude = (): UseClaudeReturn => {
     []
   )
 
+  const reset = useCallback(() => {
+    setOutput("")
+    setIsLoading(false)
+  }, [])
+
   return {
     output,
     isLoading,
     streamResponse,
+    reset,
   }
 }
