@@ -14,32 +14,32 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react"
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { FaCameraRetro, FaRedo } from "react-icons/fa"
-import { Camera, CameraType } from "react-camera-pro"
-import { downloadImageAsFile } from "@/utils/download"
+import { Camera } from "react-camera-pro"
 import { Title } from "@/components/Title"
 import { SituationSelector } from "@/components/SituationSelector"
 import { Loading } from "@/components/Loading"
 import { MyIconButton } from "@/components/MyIconButton"
 import { TwitterShareButton } from "@/components/TwitterShareButton"
 import { generateShareText } from "@/features/Tweet"
+import { useCamera2 } from "@/hooks/useCamera2"
 
 export default function Home() {
   const { streamResponse, isLoading, output, reset } = useChatGPT()
   const toast = useToast()
-  const camera = useRef<CameraType>(null)
   const [situation, setSituation] = useState<Situation | undefined>(undefined)
-  const [takenPicture, setTakenPicture] = useState<File | undefined>(undefined)
+  const { takePhoto, retakePhoto, capturedPhoto, photoPreview, cameraRef } =
+    useCamera2()
 
-  const [isLargerThan768] = useMediaQuery("(min-width: 768px)")
+  const [isMobile] = useMediaQuery("(min-width: 768px)")
 
-  const pictureUrl = useMemo(() => {
-    if (takenPicture === undefined) {
-      return undefined
+  const prompt = useMemo(() => {
+    if (situation === undefined) {
+      return ""
     }
-    return URL.createObjectURL(takenPicture)
-  }, [takenPicture])
+    return situationToPrompt(situation)
+  }, [situation])
 
   const onChangeSituation = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = event.target
@@ -61,42 +61,34 @@ export default function Home() {
       return
     }
 
-    if (camera.current) {
-      const image = camera.current.takePhoto()
-      const imageUrl = image as string
-      const imageFile = await downloadImageAsFile(imageUrl)
-      setTakenPicture(imageFile)
+    try {
+      const photoFile = await takePhoto()
 
-      try {
-        if (!imageFile) {
-          toast({
-            description: "ファイルが選択されませんでした。",
-            status: "warning",
-            isClosable: true,
-            position: "top",
-          })
-          return
-        }
-
-        const prompt = situationToPrompt(situation)
-
-        await streamResponse(prompt, imageFile)
-      } catch (error) {
-        console.error("Error during file selection or streaming:", error)
+      if (photoFile) {
+        await streamResponse(prompt, photoFile)
+      } else {
         toast({
-          description: "エラーが発生しました。もう一度お試しください。",
-          status: "error",
+          description: "写真の撮影に失敗しました。もう一度お試しください。",
+          status: "warning",
           isClosable: true,
           position: "top",
         })
       }
+    } catch (error) {
+      console.error("Error during photo capture or streaming:", error)
+      toast({
+        description: "エラーが発生しました。もう一度お試しください。",
+        status: "error",
+        isClosable: true,
+        position: "top",
+      })
     }
-  }, [situation, streamResponse, toast])
+  }, [situation, takePhoto, streamResponse, prompt, toast])
 
   const handleRetryButtonClick = useCallback(() => {
-    setTakenPicture(undefined)
+    retakePhoto()
     reset()
-  }, [reset])
+  }, [retakePhoto, reset])
 
   const checkResult = useMemo((): AppearanceCheckProps | undefined => {
     if (isLoading) {
@@ -104,6 +96,7 @@ export default function Home() {
     }
     return parseAppearanceCheck(output)
   }, [isLoading, output])
+
   return (
     <Box
       bgGradient="linear(to-r, #89aaff, #8bfff8)"
@@ -115,16 +108,16 @@ export default function Home() {
     >
       <VStack spacing={10}>
         <Title />
-        <Box w={isLargerThan768 ? "50%" : "90%"} minW="300px">
+        <Box w={isMobile ? "50%" : "90%"} minW="300px">
           <SituationSelector onChangeSituation={onChangeSituation} />
         </Box>
-        <Flex w="100%" direction={isLargerThan768 ? "row" : "column"} gap={4}>
-          <Box w={isLargerThan768 ? "60%" : "100%"}>
-            {pictureUrl !== undefined ? (
+        <Flex w="100%" direction={isMobile ? "row" : "column"} gap={4}>
+          <Box w={isMobile ? "60%" : "100%"}>
+            {photoPreview ? (
               <Box borderRadius="32px" overflow="hidden">
                 <Image
-                  src={pictureUrl}
-                  alt="Uploaded"
+                  src={photoPreview}
+                  alt="Captured"
                   style={{
                     transform: "scaleX(-1)",
                     width: "100%",
@@ -135,7 +128,7 @@ export default function Home() {
             ) : (
               <Box borderRadius="32px" overflow="hidden">
                 <Camera
-                  ref={camera}
+                  ref={cameraRef}
                   errorMessages={{
                     noCameraAccessible: "カメラが使えないみたい🥺",
                     permissionDenied: "カメラが使えないみたい🥺",
@@ -148,7 +141,7 @@ export default function Home() {
             )}
           </Box>
           <Flex
-            w={isLargerThan768 ? "38%" : "100%"}
+            w={isMobile ? "38%" : "100%"}
             direction="column"
             bg="white"
             borderRadius="32px"
@@ -167,7 +160,7 @@ export default function Home() {
             )}
           </Flex>
         </Flex>
-        {takenPicture ? (
+        {capturedPhoto ? (
           <HStack>
             <MyIconButton
               onClick={handleRetryButtonClick}

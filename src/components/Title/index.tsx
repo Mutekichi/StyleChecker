@@ -4,7 +4,7 @@ import { FC } from "react"
 export const Title: FC = () => {
   return (
     <Text
-      fontSize={["2xl", "3xl", "4xl", "5xl"]}
+      fontSize={["xl", "2xl", "3xl", "4xl"]}
       fontWeight="bold"
       color="white"
       letterSpacing={4}
