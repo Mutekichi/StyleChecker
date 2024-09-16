@@ -4,7 +4,7 @@ import { AppearanceCheckResultView } from "@/components/AppearanceCheck"
 import { parseAppearanceCheck } from "@/features/Parse"
 import { AppearanceCheckProps } from "@/features/Parse/types"
 import { Situation, situationToPrompt } from "@/features/Situation"
-import { useChatGPT, useMockChatGPT } from "@/hooks/useChatGPT"
+import { useChatGPT } from "@/hooks/useChatGPT"
 import {
   Box,
   Flex,
