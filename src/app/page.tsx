@@ -4,7 +4,7 @@ import { AppearanceCheckResultView } from "@/components/AppearanceCheck"
 import { parseAppearanceCheck } from "@/features/Parse"
 import { AppearanceCheckProps } from "@/features/Parse/types"
 import { Situation, situationToPrompt } from "@/features/Situation"
-import { useChatGPT } from "@/hooks/useChatGPT"
+import { useChatGPT, useMockChatGPT } from "@/hooks/useChatGPT"
 import {
   Box,
   Flex,
@@ -27,6 +27,8 @@ import { useCamera } from "@/hooks/useCamera"
 
 export default function Home() {
   const { streamResponse, isLoading, output, reset } = useChatGPT()
+  // for local development especially on real mobile devices
+  // const { streamResponse, isLoading, output, reset } = useMockChatGPT()
   const toast = useToast()
   const [situation, setSituation] = useState<Situation | undefined>(undefined)
 

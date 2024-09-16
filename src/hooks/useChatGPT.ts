@@ -77,3 +77,65 @@ export const useChatGPT = (): UseChatGPTReturn => {
     reset,
   }
 }
+
+function generateMockResponse(): string {
+  const appearanceCheck = {
+    dress: {
+      OK: Math.random() > 0.5,
+      comment: "服装は適切です。清潔感があり、場面に合っています。",
+    },
+    grooming: {
+      OK: Math.random() > 0.5,
+      comment: "身だしなみは整っています。髪や肌の手入れが行き届いています。",
+    },
+    visual: {
+      OK: Math.random() > 0.5,
+      comment: "全体的な印象は良好です。自信に満ちた様子が伺えます。",
+    },
+  }
+
+  return JSON.stringify(appearanceCheck)
+}
+
+export const useMockChatGPT = (): UseChatGPTReturn => {
+  const [output, setOutput] = useState<string>("")
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const streamResponse = useCallback(
+    async (prompt: string, image?: File): Promise<void> => {
+      setIsLoading(true)
+      setOutput("")
+      setError(null)
+
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 200))
+
+        const mockResponse = generateMockResponse()
+
+        setOutput(mockResponse)
+      } catch (error) {
+        console.error("Error in mock ChatGPT API call:", error)
+        setError("Error occurred while streaming the mock response.")
+        setOutput("An error occurred. Please try again.")
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    []
+  )
+
+  const reset = useCallback(() => {
+    setOutput("")
+    setIsLoading(false)
+    setError(null)
+  }, [])
+
+  return {
+    output,
+    isLoading,
+    error,
+    streamResponse,
+    reset,
+  }
+}
