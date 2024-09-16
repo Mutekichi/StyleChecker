@@ -4,7 +4,7 @@ import { AppearanceCheckResultView } from "@/components/AppearanceCheck"
 import { parseAppearanceCheck } from "@/features/Parse"
 import { AppearanceCheckProps } from "@/features/Parse/types"
 import { Situation, situationToPrompt } from "@/features/Situation"
-import { useClaude } from "@/hooks/useClaude"
+import { useChatGPT } from "@/hooks/useChatGPT"
 import {
   Box,
   Flex,
@@ -26,7 +26,7 @@ import { TwitterShareButton } from "@/components/TwitterShareButton"
 import { generateShareText } from "@/features/Tweet"
 
 export default function Home() {
-  const { streamResponse, isLoading, output, reset } = useClaude()
+  const { streamResponse, isLoading, output, reset } = useChatGPT()
   const toast = useToast()
   const camera = useRef<CameraType>(null)
   const [situation, setSituation] = useState<Situation | undefined>(undefined)
@@ -110,6 +110,8 @@ export default function Home() {
       minHeight="100vh"
       width="100%"
       p={4}
+      pl={20}
+      pr={20}
     >
       <VStack spacing={10}>
         <Title />
