@@ -13,25 +13,26 @@ export const SituationSelector: FC<SituationSelectorProps> = (props) => {
     <Select
       borderRadius="full"
       placeholder="今日はどこに行くのかな？🤔✨"
-      fontSize="x-large"
-      fontWeight="normal"
+      fontSize={["lg", "xl", "2xl", "2xl"]}
+      fontWeight="light"
       onChange={onChangeSituation}
       backgroundColor="white"
       textAlign="center"
       h={20}
       w="100%"
-      icon={<Icon as={ChevronDownIcon} color="gray.500" w={6} h={6} />}
+      icon={<Icon as={ChevronDownIcon} color="gray.500" w={4} h={4} />}
       iconSize="24px"
       sx={{
+        "text-align-last": "center",
         "& > option": {
           background: "white",
           color: "black",
         },
       }}
     >
-      <option value="friend">今日は友達と楽しくお出かけ✨😊</option>
-      <option value="date">今日はこれからデート❤️😍</option>
-      <option value="boss">今日は上司と会食💼🍽</option>
+      <option value="friend">友達と楽しくお出かけ✨😊</option>
+      <option value="date">これからデート❤️😍</option>
+      <option value="boss">上司と会食💼🍽</option>
     </Select>
   )
 }

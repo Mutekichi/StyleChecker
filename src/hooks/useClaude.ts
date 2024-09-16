@@ -15,7 +15,7 @@ export const useClaude = (): UseClaudeReturn => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const streamResponse = useCallback(
-    async (prompt: string, image: File): Promise<void> => {
+    async (prompt: string, image?: File): Promise<void> => {
       setIsLoading(true)
       setOutput("")
 

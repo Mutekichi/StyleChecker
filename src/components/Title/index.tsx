@@ -7,7 +7,7 @@ export const Title: FC = () => {
       fontSize={["2xl", "3xl", "4xl", "5xl"]}
       fontWeight="bold"
       color="white"
-      letterSpacing={4}
+      letterSpacing={[2, 4]}
     >
       みだしなみチェッカー
     </Text>

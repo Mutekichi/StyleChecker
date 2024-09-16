@@ -14,32 +14,41 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react"
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { FaCameraRetro, FaRedo } from "react-icons/fa"
-import { Camera, CameraType } from "react-camera-pro"
-import { downloadImageAsFile } from "@/utils/download"
+import { Camera } from "react-camera-pro"
 import { Title } from "@/components/Title"
 import { SituationSelector } from "@/components/SituationSelector"
 import { Loading } from "@/components/Loading"
 import { MyIconButton } from "@/components/MyIconButton"
 import { TwitterShareButton } from "@/components/TwitterShareButton"
 import { generateShareText } from "@/features/Tweet"
+import { useCamera } from "@/hooks/useCamera"
 
 export default function Home() {
   const { streamResponse, isLoading, output, reset } = useChatGPT()
+  // for local development especially on real mobile devices
+  // const { streamResponse, isLoading, output, reset } = useMockChatGPT()
   const toast = useToast()
-  const camera = useRef<CameraType>(null)
   const [situation, setSituation] = useState<Situation | undefined>(undefined)
-  const [takenPicture, setTakenPicture] = useState<File | undefined>(undefined)
 
-  const [isLargerThan768] = useMediaQuery("(min-width: 768px)")
+  const {
+    takePhoto,
+    retakePhoto,
+    capturedPhoto,
+    photoPreview,
+    cameraRef,
+    hasCamera,
+  } = useCamera()
 
-  const pictureUrl = useMemo(() => {
-    if (takenPicture === undefined) {
-      return undefined
+  const [isMobile] = useMediaQuery("(min-width: 768px)")
+
+  const prompt = useMemo(() => {
+    if (situation === undefined) {
+      return ""
     }
-    return URL.createObjectURL(takenPicture)
-  }, [takenPicture])
+    return situationToPrompt(situation)
+  }, [situation])
 
   const onChangeSituation = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = event.target
@@ -60,43 +69,34 @@ export default function Home() {
       })
       return
     }
+    try {
+      const photoFile = await takePhoto()
 
-    if (camera.current) {
-      const image = camera.current.takePhoto()
-      const imageUrl = image as string
-      const imageFile = await downloadImageAsFile(imageUrl)
-      setTakenPicture(imageFile)
-
-      try {
-        if (!imageFile) {
-          toast({
-            description: "ファイルが選択されませんでした。",
-            status: "warning",
-            isClosable: true,
-            position: "top",
-          })
-          return
-        }
-
-        const prompt = situationToPrompt(situation)
-
-        await streamResponse(prompt, imageFile)
-      } catch (error) {
-        console.error("Error during file selection or streaming:", error)
+      if (photoFile) {
+        await streamResponse(prompt, photoFile)
+      } else {
         toast({
-          description: "エラーが発生しました。もう一度お試しください。",
-          status: "error",
+          description: "写真の撮影に失敗しました。もう一度お試しください。",
+          status: "warning",
           isClosable: true,
           position: "top",
         })
       }
+    } catch (error) {
+      console.error("Error during photo capture or streaming:", error)
+      toast({
+        description: "エラーが発生しました。もう一度お試しください。",
+        status: "error",
+        isClosable: true,
+        position: "top",
+      })
     }
-  }, [situation, streamResponse, toast])
+  }, [situation, takePhoto, streamResponse, prompt, toast])
 
   const handleRetryButtonClick = useCallback(() => {
-    setTakenPicture(undefined)
+    retakePhoto()
     reset()
-  }, [reset])
+  }, [retakePhoto, reset])
 
   const checkResult = useMemo((): AppearanceCheckProps | undefined => {
     if (isLoading) {
@@ -104,38 +104,45 @@ export default function Home() {
     }
     return parseAppearanceCheck(output)
   }, [isLoading, output])
+
   return (
     <Box
       bgGradient="linear(to-r, #89aaff, #8bfff8)"
-      minHeight="100vh"
+      minH="100dvh"
       width="100%"
-      p={4}
-      pl={20}
-      pr={20}
+      pt={6}
+      pb={12}
+      px={[4, 6]}
     >
-      <VStack spacing={10}>
+      <VStack spacing={10} w="90%" margin="0 auto">
         <Title />
-        <Box w={isLargerThan768 ? "50%" : "90%"} minW="300px">
+        <Box w="100%" minW="300px">
           <SituationSelector onChangeSituation={onChangeSituation} />
         </Box>
-        <Flex w="100%" direction={isLargerThan768 ? "row" : "column"} gap={4}>
-          <Box w={isLargerThan768 ? "60%" : "100%"}>
-            {pictureUrl !== undefined ? (
+        <Flex
+          w="100%"
+          direction={isMobile ? "row" : "column"}
+          gap={4}
+          alignItems={isMobile ? undefined : "center"}
+          justifyContent="center"
+        >
+          <Box w={isMobile ? "58%" : "100%"}>
+            {photoPreview ? (
               <Box borderRadius="32px" overflow="hidden">
                 <Image
-                  src={pictureUrl}
-                  alt="Uploaded"
+                  src={photoPreview}
+                  alt="Captured"
                   style={{
-                    transform: "scaleX(-1)",
+                    transform: hasCamera ? "scaleX(-1)" : "none",
                     width: "100%",
                     height: "auto",
                   }}
                 />
               </Box>
-            ) : (
+            ) : hasCamera ? (
               <Box borderRadius="32px" overflow="hidden">
                 <Camera
-                  ref={camera}
+                  ref={cameraRef}
                   errorMessages={{
                     noCameraAccessible: "カメラが使えないみたい🥺",
                     permissionDenied: "カメラが使えないみたい🥺",
@@ -145,30 +152,34 @@ export default function Home() {
                   aspectRatio={4 / 3}
                 />
               </Box>
+            ) : (
+              <></>
             )}
           </Box>
-          <Flex
-            w={isLargerThan768 ? "38%" : "100%"}
-            direction="column"
-            bg="white"
-            borderRadius="32px"
-            p="32px"
-            overflow="auto"
-          >
-            {isLoading ? (
-              <Loading />
-            ) : checkResult ? (
-              <AppearanceCheckResultView
-                result={checkResult}
-                isLoading={isLoading}
-              />
-            ) : (
-              <Box flex="1" />
-            )}
-          </Flex>
+          {(isMobile || output) && (
+            <Flex
+              w={isMobile ? "40%" : "100%"}
+              direction="column"
+              bg="white"
+              borderRadius="32px"
+              p="32px"
+              overflow="auto"
+            >
+              {isLoading ? (
+                <Loading />
+              ) : checkResult ? (
+                <AppearanceCheckResultView
+                  result={checkResult}
+                  isLoading={isLoading}
+                />
+              ) : (
+                <Box flex="1" />
+              )}
+            </Flex>
+          )}
         </Flex>
-        {takenPicture ? (
-          <HStack>
+        {capturedPhoto ? (
+          <HStack spacing={8}>
             <MyIconButton
               onClick={handleRetryButtonClick}
               icon={<FaRedo />}
