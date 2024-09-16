@@ -23,14 +23,21 @@ import { Loading } from "@/components/Loading"
 import { MyIconButton } from "@/components/MyIconButton"
 import { TwitterShareButton } from "@/components/TwitterShareButton"
 import { generateShareText } from "@/features/Tweet"
-import { useCamera2 } from "@/hooks/useCamera2"
+import { useCamera } from "@/hooks/useCamera"
 
 export default function Home() {
   const { streamResponse, isLoading, output, reset } = useChatGPT()
   const toast = useToast()
   const [situation, setSituation] = useState<Situation | undefined>(undefined)
-  const { takePhoto, retakePhoto, capturedPhoto, photoPreview, cameraRef } =
-    useCamera2()
+
+  const {
+    takePhoto,
+    retakePhoto,
+    capturedPhoto,
+    photoPreview,
+    cameraRef,
+    hasCamera,
+  } = useCamera()
 
   const [isMobile] = useMediaQuery("(min-width: 768px)")
 
@@ -60,7 +67,6 @@ export default function Home() {
       })
       return
     }
-
     try {
       const photoFile = await takePhoto()
 
@@ -100,32 +106,38 @@ export default function Home() {
   return (
     <Box
       bgGradient="linear(to-r, #89aaff, #8bfff8)"
-      minHeight="100vh"
+      minH="100dvh"
       width="100%"
-      p={4}
-      pl={20}
-      pr={20}
+      pt={6}
+      pb={12}
+      px={[4, 6]}
     >
-      <VStack spacing={10}>
+      <VStack spacing={10} w="90%" margin="0 auto">
         <Title />
-        <Box w={isMobile ? "50%" : "90%"} minW="300px">
+        <Box w="100%" minW="300px">
           <SituationSelector onChangeSituation={onChangeSituation} />
         </Box>
-        <Flex w="100%" direction={isMobile ? "row" : "column"} gap={4}>
-          <Box w={isMobile ? "60%" : "100%"}>
+        <Flex
+          w="100%"
+          direction={isMobile ? "row" : "column"}
+          gap={4}
+          alignItems={isMobile ? undefined : "center"}
+          justifyContent="center"
+        >
+          <Box w={isMobile ? "58%" : "100%"}>
             {photoPreview ? (
               <Box borderRadius="32px" overflow="hidden">
                 <Image
                   src={photoPreview}
                   alt="Captured"
                   style={{
-                    transform: "scaleX(-1)",
+                    transform: hasCamera ? "scaleX(-1)" : "none",
                     width: "100%",
                     height: "auto",
                   }}
                 />
               </Box>
-            ) : (
+            ) : hasCamera ? (
               <Box borderRadius="32px" overflow="hidden">
                 <Camera
                   ref={cameraRef}
@@ -138,30 +150,34 @@ export default function Home() {
                   aspectRatio={4 / 3}
                 />
               </Box>
+            ) : (
+              <></>
             )}
           </Box>
-          <Flex
-            w={isMobile ? "38%" : "100%"}
-            direction="column"
-            bg="white"
-            borderRadius="32px"
-            p="32px"
-            overflow="auto"
-          >
-            {isLoading ? (
-              <Loading />
-            ) : checkResult ? (
-              <AppearanceCheckResultView
-                result={checkResult}
-                isLoading={isLoading}
-              />
-            ) : (
-              <Box flex="1" />
-            )}
-          </Flex>
+          {(isMobile || output) && (
+            <Flex
+              w={isMobile ? "40%" : "100%"}
+              direction="column"
+              bg="white"
+              borderRadius="32px"
+              p="32px"
+              overflow="auto"
+            >
+              {isLoading ? (
+                <Loading />
+              ) : checkResult ? (
+                <AppearanceCheckResultView
+                  result={checkResult}
+                  isLoading={isLoading}
+                />
+              ) : (
+                <Box flex="1" />
+              )}
+            </Flex>
+          )}
         </Flex>
         {capturedPhoto ? (
-          <HStack>
+          <HStack spacing={8}>
             <MyIconButton
               onClick={handleRetryButtonClick}
               icon={<FaRedo />}

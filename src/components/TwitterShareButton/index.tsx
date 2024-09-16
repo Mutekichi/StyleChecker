@@ -1,5 +1,5 @@
 import React from "react"
-import { FaTwitter } from "react-icons/fa"
+import { FaXTwitter } from "react-icons/fa6"
 import { MyIconButton } from "../MyIconButton"
 
 interface TwitterShareButtonProps {
@@ -19,9 +19,11 @@ export const TwitterShareButton: React.FC<TwitterShareButtonProps> = ({
   return (
     <MyIconButton
       onClick={handleShare}
-      icon={<FaTwitter />}
-      ariaLabel="Twitter (X)で共有"
-      colorScheme="twitter"
+      icon={<FaXTwitter />}
+      ariaLabel="Xで共有"
+      bg="black"
+      color="white"
+      _hover={{ bg: "gray.700" }}
     />
   )
 }

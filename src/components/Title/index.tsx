@@ -4,10 +4,10 @@ import { FC } from "react"
 export const Title: FC = () => {
   return (
     <Text
-      fontSize={["xl", "2xl", "3xl", "4xl"]}
+      fontSize={["2xl", "3xl", "4xl", "5xl"]}
       fontWeight="bold"
       color="white"
-      letterSpacing={4}
+      letterSpacing={[2, 4]}
     >
       みだしなみチェッカー
     </Text>
