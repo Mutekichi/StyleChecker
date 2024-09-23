@@ -29,7 +29,7 @@ export const useChatGPT = (): UseChatGPTReturn => {
       }
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/chatgpt-stream`, {
+        const response = await fetch(`${API_BASE_URL}`, {
           method: "POST",
           body: formData,
         })
